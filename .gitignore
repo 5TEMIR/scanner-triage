@@ -1,0 +1,7 @@
+__pycache__/
+*.pyc
+.pytest_cache/
+.venv/
+security-report.md
+trivy.json
+semgrep.sarif
