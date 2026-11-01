@@ -1,0 +1,40 @@
+{
+  "SchemaVersion": 2,
+  "ArtifactName": "booking-api:latest",
+  "Results": [
+    {
+      "Target": "Python",
+      "Vulnerabilities": [
+        {
+          "VulnerabilityID": "CVE-2024-23342",
+          "PkgName": "ecdsa",
+          "InstalledVersion": "0.18.0",
+          "FixedVersion": "",
+          "Severity": "HIGH",
+          "Title": "python-ecdsa vulnerable to Minerva timing attack",
+          "Description": "The python-ecdsa library is vulnerable to a timing attack on P-256."
+        },
+        {
+          "VulnerabilityID": "CVE-2024-33663",
+          "PkgName": "python-jose",
+          "InstalledVersion": "3.3.0",
+          "FixedVersion": "3.4.0",
+          "Severity": "CRITICAL",
+          "Title": "python-jose algorithm confusion with OpenSSH ECDSA keys",
+          "Description": "Algorithm confusion allows an attacker to forge tokens."
+        }
+      ]
+    },
+    {
+      "Target": "Dockerfile",
+      "Misconfigurations": [
+        {
+          "ID": "DS002",
+          "Title": "Image user should not be 'root'",
+          "Severity": "HIGH",
+          "Description": "Running containers as root allows privilege escalation."
+        }
+      ]
+    }
+  ]
+}

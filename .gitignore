@@ -5,3 +5,7 @@ __pycache__/
 security-report.md
 trivy.json
 semgrep.sarif
+
+# scan outputs live in the repo root - the test fixtures must stay tracked
+!tests/fixtures/trivy.json
+!tests/fixtures/semgrep.sarif

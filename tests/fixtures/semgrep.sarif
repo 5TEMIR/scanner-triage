@@ -1,0 +1,36 @@
+{
+  "version": "2.1.0",
+  "runs": [
+    {
+      "tool": {"driver": {"name": "semgrep", "rules": []}},
+      "results": [
+        {
+          "ruleId": "python.lang.security.audit.eval-detected",
+          "level": "error",
+          "message": {"text": "Detected use of eval() on user-controlled data."},
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {"uri": "app/main.py"},
+                "region": {"startLine": 42}
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "python.lang.security.audit.hardcoded-password",
+          "level": "warning",
+          "message": {"text": "Hardcoded password detected."},
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {"uri": "app/config.py"},
+                "region": {"startLine": 7}
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
