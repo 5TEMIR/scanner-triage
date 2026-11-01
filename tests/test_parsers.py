@@ -3,7 +3,14 @@ from pathlib import Path
 import pytest
 
 from triage.models import Finding, dedupe, normalize_severity, sort_findings
-from triage.parsers import UnsupportedReport, detect_format, load_reports, parse_report
+from triage.parsers import (
+    UnsupportedReport,
+    detect_format,
+    load_reports,
+    parse_report,
+    parse_semgrep,
+    parse_trivy,
+)
 
 FIXTURES = Path(__file__).parent / "fixtures"
 
@@ -31,6 +38,65 @@ def test_semgrep_sarif_is_normalized() -> None:
     assert first.target == "app/main.py"
     assert first.line == 42
     assert first.severity == "HIGH"  # SARIF "error"
+
+
+def test_clean_trivy_report_has_no_findings() -> None:
+    # Trivy omits "Results" when nothing was found - that is still a valid report.
+    assert parse_report(FIXTURES / "trivy-clean.json") == []
+
+
+def test_semgrep_uses_rule_default_level() -> None:
+    # Semgrep leaves "level" off the result and relies on the rule default.
+    payload = {
+        "runs": [
+            {
+                "tool": {
+                    "driver": {
+                        "rules": [
+                            {"id": "err-rule", "defaultConfiguration": {"level": "error"}},
+                            {"id": "note-rule", "defaultConfiguration": {"level": "note"}},
+                        ]
+                    }
+                },
+                "results": [
+                    {"ruleId": "err-rule", "message": {"text": "boom"}},
+                    {"ruleId": "note-rule", "message": {"text": "fyi"}},
+                ],
+            }
+        ]
+    }
+    findings = parse_semgrep(payload)
+    assert [f.severity for f in findings] == ["HIGH", "LOW"]
+
+
+def test_trivy_secret_is_normalized() -> None:
+    findings = parse_report(FIXTURES / "trivy-secret.json")
+    assert len(findings) == 1
+    secret = findings[0]
+    assert secret.source == "trivy"
+    assert secret.rule_id == "github-pat"
+    assert secret.severity == "CRITICAL"
+    assert secret.target == "app/config.py"
+    assert secret.line == 7
+    # the matched value (masked or not) must never reach the report
+    assert secret.description == ""
+
+
+def test_trivy_secret_match_is_not_echoed() -> None:
+    payload = {
+        "Results": [
+            {
+                "Target": "app.py",
+                "Secrets": [
+                    {"RuleID": "generic-api-key", "Severity": "HIGH", "Match": "api_key=DO-NOT-COPY"}
+                ],
+            }
+        ]
+    }
+    findings = parse_trivy(payload)
+    assert len(findings) == 1
+    assert "DO-NOT-COPY" not in findings[0].description
+    assert "DO-NOT-COPY" not in findings[0].title
 
 
 def test_unknown_report_is_rejected(tmp_path: Path) -> None:
@@ -80,3 +146,7 @@ def test_multiple_reports_are_merged() -> None:
 def test_detect_format() -> None:
     assert detect_format({"runs": []}) == "semgrep"
     assert detect_format({"Results": []}) == "trivy"
+
+
+def test_detect_clean_trivy_report() -> None:
+    assert detect_format({"SchemaVersion": 2, "ArtifactType": "filesystem"}) == "trivy"

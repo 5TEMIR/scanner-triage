@@ -14,7 +14,8 @@ CLI-утилита для триажа результатов сканеров: 
 
 ## Возможности
 
-- парсинг Trivy JSON (`Results[].Vulnerabilities`, `Results[].Misconfigurations`);
+- парсинг Trivy JSON (`Results[].Vulnerabilities`, `Results[].Misconfigurations`,
+  `Results[].Secrets`);
 - парсинг Semgrep SARIF (`runs[].results[]`);
 - нормализация severity (`error` → `HIGH`, `warning` → `MEDIUM`, `moderate` → `MEDIUM`);
 - дедупликация по стабильному fingerprint (source + rule + target + line + package);
@@ -62,6 +63,7 @@ CLI-коды возврата и клиент GitLab (retry на 5xx/429, отс
 | Подвисший HTTP-запрос | `timeout` на каждый запрос (по умолчанию 10 с) |
 | Временные 5xx/429 | до 3 повторов с экспоненциальным backoff |
 | Некорректный отчёт | явная ошибка `UnsupportedReport`, код возврата 2 |
+| Утечка значения секрета в отчёт | поля `Match`/`Code` от Trivy не используются: в отчёт попадают только правило, файл и строка |
 | Дубли задач | fingerprint в теле issue и дедупликация до создания |
 | Инъекция в Markdown | экранирование `|` и переносов строк в таблицах |
 

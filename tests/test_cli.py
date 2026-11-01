@@ -28,3 +28,10 @@ def test_cli_rejects_unknown_report(tmp_path: Path) -> None:
     report = tmp_path / "unknown.json"
     report.write_text("{}", encoding="utf-8")
     assert main([str(report), "-o", str(tmp_path / "out.md")]) == 2
+
+
+def test_cli_accepts_clean_report(tmp_path: Path) -> None:
+    output = tmp_path / "report.md"
+    code = main([str(FIXTURES / "trivy-clean.json"), "-o", str(output), "--fail-on", "LOW"])
+    assert code == 0
+    assert "Findings not found" in output.read_text(encoding="utf-8")
